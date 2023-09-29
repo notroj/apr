@@ -52,7 +52,7 @@ jobs:
             packages: libdb5.3-dev
             notest-cflags: -Werror
             config: --enable-maintainer-mode --with-berkeley-db --with-dbm=db5
-            config-output: APU_HAVE_DB
+            config-output: APU_HAVE_FOO APU_HAVE_DB
       fail-fast: false
 
     runs-on: ubuntu-latest
