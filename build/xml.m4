@@ -130,8 +130,7 @@ AC_ARG_WITH([expat],
 if test "$apu_has_libxml2" != "1"; then
   APU_SYSTEM_EXPAT
 
-  APR_ADDTO(APRUTIL_EXPORT_LIBS, [$apu_expat_libs])
-  APR_ADDTO(APRUTIL_LIBS, [$apu_expat_libs])
+  APR_ADDTO(LDADD_xml, [$apu_expat_libs])
 
   APR_XML_DIR=$bundled_subdir
   AC_SUBST(APR_XML_DIR)
@@ -165,7 +164,7 @@ AC_ARG_WITH([libxml2],
       xml2_LIBS="`$XML2_CONFIG --libs`"
 
       APR_ADDTO(CPPFLAGS, [$xml2_CPPFLAGS])
-      APR_ADDTO(LIBS, [$xml2_LIBS])
+      APR_ADDTO(LDADD_xml, [$xml2_LIBS])
     fi
 
     AC_CHECK_HEADERS(libxml/parser.h, AC_CHECK_LIB(xml2, xmlCreatePushParserCtxt, [apu_has_libxml2=1]))
@@ -195,7 +194,7 @@ AC_SUBST(apu_has_libxml2)
 if test ${apu_has_libxml2} = "1" ; then
   APR_ADDTO(APRUTIL_CPPFLAGS, [$xml2_CPPFLAGS])
   APR_ADDTO(APRUTIL_PRIV_INCLUDES, [$xml2_CPPFLAGS])
-  APR_ADDTO(APRUTIL_LIBS, [$xml2_LIBS])
+  APR_ADDTO(LDADD_xml, [$xml2_LIBS])
 fi
 
 LIBS="$old_libs"
@@ -215,6 +214,8 @@ dnl
 AC_DEFUN([APU_FIND_XML], [
 APU_FIND_LIBXML2
 APU_FIND_EXPAT
+
+AC_SUBST(LDADD_xml)
 
 if test ${apu_has_expat} = "1" && test ${apu_has_libxml2} = "1" ; then
   AC_MSG_ERROR(Cannot build with both expat and libxml2 - please select one)

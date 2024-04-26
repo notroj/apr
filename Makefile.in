@@ -35,8 +35,10 @@ INSTALL_DATA = @INSTALL_DATA@
 EXTRA_OBJECTS = @EXTRA_OBJECTS@
 APR_DSO_MODULES = @APR_DSO_MODULES@
 LINK_MODULE = $(LIBTOOL) $(LTFLAGS) --mode=link --tag=CC $(CC) $(LT_LDFLAGS) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(APRUTIL_LDFLAGS) -release $(APR_MAJOR_VERSION) -module -rpath $(APR_DSO_LIBDIR)
+LINK_LIBRARY = $(LIBTOOL) $(LTFLAGS) --mode=link --tag=CC $(CC) $(LT_LDFLAGS) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(APRUTIL_LDFLAGS) -release $(APR_MAJOR_VERSION) -rpath $(libdir)
 APR_DSO_LIBDIR = @APR_DSO_LIBDIR@
-APRUTIL_EXPORT_LIBS = @APRUTIL_EXPORT_LIBS@
+APR_LIBRARIES = @APR_LIBRARIES@
+APR_LIBRARY_TARGETS = @APR_LIBRARY_TARGETS@
 
 #
 # Rules for building specific targets, starting with 'all' for
@@ -88,6 +90,7 @@ LDADD_ldap = @LDADD_ldap@
 LDADD_crypto_openssl = @LDADD_crypto_openssl@
 LDADD_crypto_nss = @LDADD_crypto_nss@
 LDADD_crypto_commoncrypto = @LDADD_crypto_commoncrypto@
+LDADD_xml = @LDADD_xml@
 
 # Create apr-config script suitable for the install tree
 apr-config.out: $(APR_CONFIG)
@@ -97,7 +100,7 @@ apr-config.out: $(APR_CONFIG)
 build/apr_rules.out: build/apr_rules.mk
 	sed -e 's,^\(apr_build.*=\).*$$,\1$(installbuilddir),' -e 's,^\(top_build.*=\).*$$,\1$(installbuilddir),' < build/apr_rules.mk > $@
 
-install: install-modules $(TARGETS)
+install: install-modules install-libraries $(TARGETS)
 	$(APR_MKDIR) $(DESTDIR)$(libdir) $(DESTDIR)$(bindir) $(DESTDIR)$(installbuilddir) \
 		     $(DESTDIR)$(libdir)/pkgconfig $(DESTDIR)$(includedir)
 	$(INSTALL_DATA) $(top_blddir)/include/apr.h $(DESTDIR)$(includedir)
@@ -126,8 +129,8 @@ install: install-modules $(TARGETS)
 	    done \
 	fi
 
-$(TARGET_LIB): $(OBJECTS) $(EXTRA_OBJECTS)
-	$(LINK) @lib_target@ $(EXTRA_OBJECTS) $(ALL_LIBS) $(APRUTIL_EXPORT_LIBS)
+$(TARGET_LIB): $(OBJECTS) $(EXTRA_OBJECTS) $(APR_LIBRARY_TARGETS)
+	$(LINK) @lib_target@ $(EXTRA_OBJECTS) $(ALL_LIBS) $(APR_LIBRARY_TARGETS)
 
 encoding/apr_escape.lo: include/private/apr_escape_test_char.h 
 
@@ -138,6 +141,11 @@ install-modules-no:
 install-modules-yes: $(APR_DSO_MODULES)
 	$(APR_MKDIR) $(DESTDIR)$(APR_DSO_LIBDIR)
 	@for m in $(APR_DSO_MODULES); do $(LIBTOOL) $(LT_LTFLAGS) $(LTFLAGS) --mode=install $(INSTALL) -m 755 $$m $(DESTDIR)$(APR_DSO_LIBDIR); done
+
+install-libraries: install-libraries-yes
+
+install-libraries-yes:
+	for m in $(APR_LIBRARY_TARGETS); do $(LIBTOOL) $(LT_LTFLAGS) $(LTFLAGS) --mode=install $(INSTALL) -m 755 $$m $(DESTDIR)$(libdir); done
 
 exports.c: $(HEADERS)
 	$(APR_MKEXPORT) $(HEADERS) > $@

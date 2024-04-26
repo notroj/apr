@@ -3199,15 +3199,21 @@ AC_SUBST(APR_DSO_LIBDIR)
 AC_SUBST(APR_DSO_MODULES)
 AC_SUBST(EXTRA_OBJECTS)
 
-dnl XXX FIXME; used for -lexpat, -liconv etc?
-AC_SUBST(APRUTIL_EXPORT_LIBS)
+APR_LIBRARIES="xml"
+APR_LIBRARY_TARGETS=
 
-dnl
-dnl Prep all the flags and stuff for compilation and export to other builds
-dnl
-APR_ADDTO(LIBS, [$APRUTIL_LIBS])
+for lib in $APR_LIBRARIES; do
+    eval ldadd=\$LDADD_$lib
+    APR_ADDTO(APR_LIBRARY_TARGETS, [libapr-$lib.la])
+
+    ### Interim hack, link libapr against libapr-X,
+    ### so shared library builds still appear to export the same ABI
+    APR_ADDTO(LIBS, [$ldadd])
+done
 
 AC_SUBST(LDFLAGS)
+AC_SUBST(APR_LIBRARIES)
+AC_SUBST(APR_LIBRARY_TARGETS)
 
 
 
