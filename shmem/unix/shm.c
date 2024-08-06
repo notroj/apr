@@ -710,6 +710,7 @@ APR_PERMS_SET_IMPLEMENT(shm)
     apr_shm_t *shm = (apr_shm_t *)theshm;
     const char *shm_name;
     int fd;
+    apr_status_t rv;
 
     if (!shm->filename)
         return APR_ENOTIMPL;
@@ -720,11 +721,17 @@ APR_PERMS_SET_IMPLEMENT(shm)
     if (fd == -1)
         return errno;
 
-    if (fchown(fd, uid, gid))
-        return errno;
+    if (fchown(fd, uid, gid)) {
+        rv = errno;
+        close(fd);
+        return rv;
+    }
 
-    if (fchmod(fd, apr_unix_perms2mode(perms)))
-        return errno;
+    if (fchmod(fd, apr_unix_perms2mode(perms))) {
+        rv = errno;
+        close(fd);
+        return rv;
+    }
 
     return APR_SUCCESS;
 #elif APR_USE_SHMEM_MMAP_TMP
