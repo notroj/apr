@@ -732,7 +732,7 @@ APR_PERMS_SET_IMPLEMENT(shm)
         close(fd);
         return rv;
     }
-
+    close(fd);
     return APR_SUCCESS;
 #elif APR_USE_SHMEM_MMAP_TMP
     apr_shm_t *shm = (apr_shm_t *)theshm;
